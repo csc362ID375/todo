@@ -1,0 +1,29 @@
+{
+	"name": "My ToDo Browser Extension",
+	"description": "Final Project",
+	"version": "1.0",
+	"manifest_version": 2,
+    "icons":{
+        "16": "icons/todo.png",
+        "48": "icons/todo.png",
+        "128": "icons/todo.png"
+    },
+    "browser_action": {
+        "default_icon": "icons/todo.png",
+        "default_title": "ToDo",
+        "default_popup": "popup/todo.html"
+    },
+    "content_scripts": [{
+		"matches": ["<all_urls>"],
+		"js": ["content.js"]
+	}],
+	"background": {
+		"scripts": ["background.js"]
+	},
+    "permissions": [
+        "*://*/*",
+        "activeTab",
+        "tabs",
+        "storage"
+    ]
+}
