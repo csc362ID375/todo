@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (ev.target.tagName === "LI") {
         //check this element
         var elCheck = ev.target.parentElement.innerText;
-        var textelCheck = elCheck.slice(0, elCheck.length - 2);
+        var textelCheck = elCheck.slice(0, elCheck.length - 4);
         //mark as checked off
         chrome.runtime.sendMessage(
           {
