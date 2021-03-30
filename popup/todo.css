@@ -73,6 +73,20 @@ ul li.checked::before {
     color: white;
 }
 
+/* style the open button */
+.open {
+    position: absolute;
+    right: 45;
+    top: 0;
+    padding: 13px 16px 12px 16px;
+}
+
+.open:hover {
+    background-color: #70A288;
+    color: white;
+}
+
+
 /* Style the header */
 .header {
     background-color: #70A288;

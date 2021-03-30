@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", function () {
       for (i = 0; i < response["item"].length; i++) {
         var li = document.createElement("li");
         var nextItem = response["item"][i]["message"];
+        var nextStatus = response["item"][i]["status"];
+
         // console.log(nextItem);
         if (nextItem != undefined) {
           var t = document.createTextNode(nextItem);
@@ -19,6 +21,15 @@ document.addEventListener("DOMContentLoaded", function () {
           span.className = "close";
           span.appendChild(txt);
           li.appendChild(span);
+
+          var span = document.createElement("SPAN");
+          var txt = document.createTextNode("\uFF0B");
+          span.className = "open";
+          span.appendChild(txt);
+          li.appendChild(span);
+          if (nextStatus == "checked") {
+            li.classList.toggle("checked");
+          }
           document.getElementById("myUL").appendChild(li);
         }
       }
@@ -34,22 +45,33 @@ document.addEventListener("DOMContentLoaded", function () {
     if (inputValue === "") {
       alert("You must write something!");
     } else {
-      chrome.runtime.sendMessage({ message: inputValue }, function (response) {
-        var li = document.createElement("li");
-        // console.log(response["item"].length);
-        var nextItem = response["item"][response["item"].length - 1]["message"];
-        // console.log(nextItem);
-        if (nextItem != undefined) {
-          var t = document.createTextNode(nextItem);
-          li.appendChild(t);
-          var span = document.createElement("SPAN");
-          var txt = document.createTextNode("\u00D7");
-          span.className = "close";
-          span.appendChild(txt);
-          li.appendChild(span);
-          document.getElementById("myUL").appendChild(li);
+      chrome.runtime.sendMessage(
+        { message: inputValue, status: "unchecked", category: "main" },
+        function (response) {
+          var li = document.createElement("li");
+          // console.log(response["item"].length);
+          var nextItem =
+            response["item"][response["item"].length - 1]["message"];
+          // console.log(nextItem);
+          if (nextItem != undefined) {
+            var t = document.createTextNode(nextItem);
+            li.appendChild(t);
+            var span = document.createElement("SPAN");
+            var txt = document.createTextNode("\u00D7");
+            span.className = "close";
+            span.appendChild(txt);
+            li.appendChild(span);
+
+            var span = document.createElement("SPAN");
+            var txt = document.createTextNode("\uFF0B");
+            span.className = "open";
+            span.appendChild(txt);
+            li.appendChild(span);
+
+            document.getElementById("myUL").appendChild(li);
+          }
         }
-      });
+      );
     }
     document.getElementById("myInput").value = "";
   });
@@ -64,7 +86,8 @@ document.addEventListener("DOMContentLoaded", function () {
       if (ev.target.className === "close") {
         //get rid of this element
         var elDelete = ev.target.parentElement.innerText;
-        var textelDelete = elDelete.slice(0, elDelete.length - 2);
+        var textelDelete = elDelete.slice(0, elDelete.length - 4);
+        console.log(textelDelete);
 
         chrome.runtime.sendMessage(
           {
@@ -92,9 +115,24 @@ document.addEventListener("DOMContentLoaded", function () {
             }
           }
         );
+      } else if (ev.target.tagName === "open") {
+        //add a subcategory --> how do I want that to be on the screen?
       } else if (ev.target.tagName === "LI") {
+        //check this element
+        var elCheck = ev.target.parentElement.innerText;
+        var textelCheck = elCheck.slice(0, elCheck.length - 2);
         //mark as checked off
-        ev.target.classList.toggle("checked");
+        chrome.runtime.sendMessage(
+          {
+            action: "check",
+            message: textelCheck,
+          },
+          function (response) {
+            // invoke callback with response
+            // rewrite the screen
+            ev.target.classList.toggle("checked");
+          }
+        );
       }
     },
     false

@@ -28,8 +28,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // console.log(obj.item);
   }
 
-  if (request.action != "getData" && request.action != "delete") {
-    // console.log(request.message);
+  if(request.action === "check"){
+    for(var i = 0; i < obj.item.length; i++){
+      if(request.message == obj.item[i].message){
+          console.log(obj.item[i].message);
+          if(obj.item[i].status == "unchecked"){
+            obj.item[i].status = "checked";
+          } else if (obj.item[i].status == "checked") {
+            obj.item[i].status = "unchecked";
+          }
+          console.log(obj.item[i].status);
+          localStorage.setItem("iList", JSON.stringify(obj));
+      }
+  }
+  }
+
+  if (request.action != "getData" && request.action != "delete" && request.action != "check") {
+    console.log(request);
     obj.item.push(request);
     localStorage.setItem("iList", JSON.stringify(obj));
   }
