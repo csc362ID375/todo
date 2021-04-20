@@ -3,17 +3,22 @@
 <head>
     <link rel="stylesheet" href="todo.css" />
     <script src="/content.js"></script>
+    <script src="/background.js"></script>
+
 </head>
 
 <body>
     <div id="myDIV" class="header">
         <h2>To Do</h2>
         <input type="text" id="myInput" placeholder="New Task...">
-        <span id = "addButton" class="addBtn">Add</span>
+        <span id="addButton" class="addBtn">Add</span>
+        <!-- <button onclick="timerShow()" class="addBtn">Timer</button> -->
     </div>
 
     <ul id="myUL">
     </ul>
+    <span id = "timer"></span> <button id = "start">Start</button>
+   
 </body>
 
 </html>
