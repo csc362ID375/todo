@@ -1,28 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-
-  //// Call this when the pop-up is shown
-// chrome.runtime.sendMessage({ cmd: 'GET_TIME' }, response => {
-//   if (response.time) {
-//     const time = new Date(response.time);
-//     startTimer(time)
-//   }
-// });
-
-// function startTimer(time) {
-//   if (time.getTime() > Date.now()) {
-//     setInterval(() => {
-//       // display the remaining time
-//     }, 1000)
-
-//   }
-// }
-
-// function startTime(time) {
-//   chrome.runtime.sendMessage({ cmd: 'START_TIMER', when: time });
-//   startTimer(time);
-// }
-
-
   const FULL_DASH_ARRAY = 283;
   const WARNING_THRESHOLD = 10;
   const ALERT_THRESHOLD = 5;
@@ -75,33 +51,35 @@ document.addEventListener("DOMContentLoaded", function () {
     clearInterval(timerInterval);
   }
 
-  function startTimer() {
-    
-    timerInterval = setInterval(() => {
+  timerInterval = setInterval(() => {
+   
+    chrome.runtime.sendMessage(
+      {
+        action: "askTime",
+      },
+      function (response) {
+        timeLeft = response;
 
-      timePassed = timePassed += 1;
-      timeLeft = TIME_LIMIT - timePassed;
+        // if(timeLeft != 0 && timeLeft != 120){
+        //   document.getElementById("playButton").style.display = "none";
+        //   document.getElementById("resetButton").style.display = "block";
+        // } else {
+        //   document.getElementById("playButton").style.display = "block";
+        //   document.getElementById("resetButton").style.display = "none";
+        // }
 
-      chrome.runtime.sendMessage(
-        {
-          action: "timer",
-          message: timeLeft
-        },
-        function (response) {
+        document.getElementById("base-timer-label").innerHTML = formatTime(
+          timeLeft
+        );
+        setCircleDasharray();
+        setRemainingPathColor(timeLeft);
 
-        });
-
-      document.getElementById("base-timer-label").innerHTML = formatTime(
-        timeLeft
-      );
-      setCircleDasharray();
-      setRemainingPathColor(timeLeft);
-
-      if (timeLeft === 0) {
-        onTimesUp();
+        if (timeLeft === 0) {
+          onTimesUp();
+        }
       }
-    }, 1000);
-  }
+    );
+  }, 1000);
 
   function formatTime(time) {
     const minutes = Math.floor(time / 60);
@@ -146,26 +124,47 @@ document.addEventListener("DOMContentLoaded", function () {
       .getElementById("base-timer-path-remaining")
       .setAttribute("stroke-dasharray", circleDasharray);
   }
- 
+
   var trackTimer = 0; //0 = off, 1 = on
+  if (trackTimer == 1) {
+    document.getElementById("playButton").style.display = "none";
+    document.getElementById("resetButton").style.display = "block";
+  } else if (trackTimer == 0) {
+    document.getElementById("playButton").style.display = "block";
+    document.getElementById("resetButton").style.display = "none";
+  }
+
   document.getElementById("start").addEventListener("click", function (ev) {
     if (trackTimer == 0) {
-
       trackTimer = 1;
-    } else if (trackTimer == 1){
+      document.getElementById("playButton").style.display = "none";
+      document.getElementById("resetButton").style.display = "block";
 
+      chrome.runtime.sendMessage(
+        {
+          action: "startTimer",
+        },
+        function (response) {
+          startTimer();
+        }
+      );
+    } else if (trackTimer == 1) {
       trackTimer = 0;
+      document.getElementById("playButton").style.display = "block";
+      document.getElementById("resetButton").style.display = "none";
+
+      chrome.runtime.sendMessage(
+        {
+          action: "resetTime",
+        },
+        function (response) {
+          document.getElementById("base-timer-label").innerHTML = formatTime(
+            TIME_LIMIT
+          );
+        }
+      );
     }
-
-    chrome.runtime.sendMessage(
-      {
-        action: "timer",
-      },
-      function (response) {
-        
-      });
-
-    startTimer();
+    // startTimer();
   });
 
   // get data on load --> is this only when its reset?
@@ -184,8 +183,11 @@ document.addEventListener("DOMContentLoaded", function () {
         var nextSubs = response["item"][i]["sub"];
 
         if (nextItem != undefined) {
-          var t = document.createTextNode(nextItem);
-          li.appendChild(t);
+          var span = document.createElement("SPAN");
+          var txt = document.createTextNode("\uFF0B");
+          span.className = "open";
+          span.appendChild(txt);
+          li.appendChild(span);
 
           var span = document.createElement("SPAN");
           var txt = document.createTextNode("\u2713");
@@ -199,11 +201,8 @@ document.addEventListener("DOMContentLoaded", function () {
           span.appendChild(txt);
           li.appendChild(span);
 
-          var span = document.createElement("SPAN");
-          var txt = document.createTextNode("\uFF0B");
-          span.className = "open";
-          span.appendChild(txt);
-          li.appendChild(span);
+          var t = document.createTextNode(nextItem);
+          li.appendChild(t);
 
           if (nextStatus == "checked") {
             li.classList.toggle("checked");
@@ -214,14 +213,15 @@ document.addEventListener("DOMContentLoaded", function () {
           if (nextSubs != undefined) {
             for (var j = 0; j < nextSubs.length; j++) {
               var li = document.createElement("li");
-              var t = document.createTextNode(nextSubs[j]);
-              li.appendChild(t);
 
               var span = document.createElement("SPAN");
               var txt = document.createTextNode("\u00D7");
               span.className = "close";
               span.appendChild(txt);
               li.appendChild(span);
+
+              var t = document.createTextNode(nextSubs[j]);
+              li.appendChild(t);
 
               li.classList = "sub";
 
@@ -250,8 +250,11 @@ document.addEventListener("DOMContentLoaded", function () {
             response["item"][response["item"].length - 1]["message"];
 
           if (nextItem != undefined) {
-            var t = document.createTextNode(nextItem);
-            li.appendChild(t);
+            var span = document.createElement("SPAN");
+            var txt = document.createTextNode("\uFF0B");
+            span.className = "open";
+            span.appendChild(txt);
+            li.appendChild(span);
 
             var span = document.createElement("SPAN");
             var txt = document.createTextNode("\u2713");
@@ -265,11 +268,9 @@ document.addEventListener("DOMContentLoaded", function () {
             span.appendChild(txt);
             li.appendChild(span);
 
-            var span = document.createElement("SPAN");
-            var txt = document.createTextNode("\uFF0B");
-            span.className = "open";
-            span.appendChild(txt);
-            li.appendChild(span);
+            var t = document.createTextNode(nextItem);
+            li.appendChild(t);
+
             document.getElementById("myUL").appendChild(li);
           }
         }
@@ -289,13 +290,12 @@ document.addEventListener("DOMContentLoaded", function () {
         //get rid of this element
         if (ev.target.parentElement.className == "sub") {
           var elDelete = ev.target.parentElement.innerText;
-          var textelDelete = elDelete.slice(0, elDelete.length - 2);
+          var textelDelete = elDelete.slice(2, elDelete.length);
 
           var action = "deleteSub";
         } else {
           var elDelete = ev.target.parentElement.innerText;
-          var textelDelete = elDelete.slice(0, elDelete.length - 6);
-
+          var textelDelete = elDelete.slice(6, elDelete.length);
           var action = "delete";
         }
 
@@ -315,8 +315,11 @@ document.addEventListener("DOMContentLoaded", function () {
               var nextSubs = response["item"][i]["sub"];
 
               if (nextItem != undefined) {
-                var t = document.createTextNode(nextItem);
-                li.appendChild(t);
+                var span = document.createElement("SPAN");
+                var txt = document.createTextNode("\uFF0B");
+                span.className = "open";
+                span.appendChild(txt);
+                li.appendChild(span);
 
                 var span = document.createElement("SPAN");
                 var txt = document.createTextNode("\u2713");
@@ -330,24 +333,23 @@ document.addEventListener("DOMContentLoaded", function () {
                 span.appendChild(txt);
                 li.appendChild(span);
 
-                var span = document.createElement("SPAN");
-                var txt = document.createTextNode("\uFF0B");
-                span.className = "open";
-                span.appendChild(txt);
-                li.appendChild(span);
+                var t = document.createTextNode(nextItem);
+                li.appendChild(t);
+
                 document.getElementById("myUL").appendChild(li);
 
                 if (nextSubs != undefined) {
                   for (var j = 0; j < nextSubs.length; j++) {
                     var li = document.createElement("li");
-                    var t = document.createTextNode(nextSubs[j]);
-                    li.appendChild(t);
 
                     var span = document.createElement("SPAN");
                     var txt = document.createTextNode("\u00D7");
                     span.className = "close";
                     span.appendChild(txt);
                     li.appendChild(span);
+
+                    var t = document.createTextNode(nextSubs[j]);
+                    li.appendChild(t);
 
                     li.classList = "sub";
 
@@ -361,7 +363,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (ev.target.className === "open") {
         //check this element
         var elCheck = ev.target.parentElement.innerText;
-        var textelCheck = elCheck.slice(0, elCheck.length - 6);
+        var textelCheck = elCheck.slice(6, elCheck.length);
 
         //add subcategory
         chrome.runtime.sendMessage(
@@ -382,8 +384,11 @@ document.addEventListener("DOMContentLoaded", function () {
               var nextSubs = response["item"][i]["sub"];
 
               if (nextItem != undefined) {
-                var t = document.createTextNode(nextItem);
-                li.appendChild(t);
+                var span = document.createElement("SPAN");
+                var txt = document.createTextNode("\uFF0B");
+                span.className = "open";
+                span.appendChild(txt);
+                li.appendChild(span);
 
                 var span = document.createElement("SPAN");
                 var txt = document.createTextNode("\u2713");
@@ -397,11 +402,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 span.appendChild(txt);
                 li.appendChild(span);
 
-                var span = document.createElement("SPAN");
-                var txt = document.createTextNode("\uFF0B");
-                span.className = "open";
-                span.appendChild(txt);
-                li.appendChild(span);
+                var t = document.createTextNode(nextItem);
+                li.appendChild(t);
 
                 if (nextStatus == "checked") {
                   li.classList.toggle("checked");
@@ -412,14 +414,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (nextSubs != undefined) {
                   for (var j = 0; j < nextSubs.length; j++) {
                     var li = document.createElement("li");
-                    var t = document.createTextNode(nextSubs[j]);
-                    li.appendChild(t);
 
                     var span = document.createElement("SPAN");
                     var txt = document.createTextNode("\u00D7");
                     span.className = "close";
                     span.appendChild(txt);
                     li.appendChild(span);
+
+                    var t = document.createTextNode(nextSubs[j]);
+                    li.appendChild(t);
 
                     li.classList = "sub";
 
@@ -433,7 +436,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (ev.target.className === "cross") {
         //check this element
         var elCheck = ev.target.parentElement.innerText;
-        var textelCheck = elCheck.slice(0, elCheck.length - 6);
+        var textelCheck = elCheck.slice(6, elCheck.length);
 
         //mark as checked off
         chrome.runtime.sendMessage(
@@ -451,12 +454,12 @@ document.addEventListener("DOMContentLoaded", function () {
         //edit subtasks
         if (ev.target.className == "sub") {
           var elEdit = ev.target.innerText;
-          var oldText = elEdit.slice(0, elEdit.length - 2);
+          var oldText = elEdit.slice(2, elEdit.length);
 
           var action = "editSub";
         } else {
           var elEdit = ev.target.innerText;
-          var oldText = elEdit.slice(0, elEdit.length - 6);
+          var oldText = elEdit.slice(6, elEdit.length);
 
           var action = "edit";
         }
@@ -475,10 +478,10 @@ document.addEventListener("DOMContentLoaded", function () {
             //edit subtasks
             if (action == "editSub") {
               var elEdit = ev.target.innerText;
-              var textelCheck = elEdit.slice(0, elEdit.length - 2);
+              var textelCheck = elEdit.slice(2, elEdit.length);
             } else {
               var elEdit = ev.target.innerText;
-              var textelCheck = elEdit.slice(0, elEdit.length - 6);
+              var textelCheck = elEdit.slice(6, elEdit.length);
             }
 
             chrome.runtime.sendMessage(
@@ -492,49 +495,6 @@ document.addEventListener("DOMContentLoaded", function () {
             );
           }
         });
-
-        //how to send something when i am clicking off?
-        // chrome.runtime.connect({ name: "popup" });
-
-        // var port = chrome.runtime.connect({ name: "popup" });
-        // port.onDisconnect.addListener(function () {
-        //   console.log("disconnected");
-        // });
-
-        // chrome.windows.onRemoved.addEventListener( function (event) {
-        //     var elCheck = ev.target.innerText;
-        //     var textelCheck = elCheck.slice(0, elCheck.length - 6);
-
-        //     console.log(oldText + " " + textelCheck);
-        //     chrome.runtime.sendMessage(
-        //       {
-        //         action: "edit",
-        //         fix: oldText,
-        //         message: textelCheck,
-        //         status: "unchecked",
-        //         category: "main",
-        //       },
-        //       function (response) {}
-        //     );
-        // });
-
-        // this.addEventListener("clickOutsideThisElement", function () {
-        //   var elCheck = ev.target.parentElement.innerText;
-        //   var textelCheck = elCheck.slice(0, elCheck.length - 6);
-
-        //   console.log(textelCheck);
-
-        //   chrome.runtime.sendMessage(
-        //     {
-        //       action: "edit",
-        //       fix: oldText,
-        //       message: textelCheck,
-        //       status: "unchecked",
-        //       category: "main",
-        //     },
-        //     function (response) {}
-        //   );
-        // });
       }
     },
     false

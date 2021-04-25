@@ -10,36 +10,42 @@ function reset() {
   // let timer;
 
   localStorage.setItem("iList", JSON.stringify(obj));
-  // localStorage.setItem("timer", timer);
-}
-
-function onTimesUp() {
-  clearInterval(timerInterval);
+  const TIME_LIMIT = 120;
+  localStorage.setItem("timer", JSON.stringify(TIME_LIMIT));
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log(request);
 
   const obj = JSON.parse(localStorage.getItem("iList")); //getItem(the object name key)
+  const TIME_LIMIT = 120;
+  let timePassed = 0;
+  let timeLeft = TIME_LIMIT;
 
-  if (request.action === "timer") {
-    const TIME_LIMIT = 5;
-    let timePassed = 0;
-    let timeLeft = TIME_LIMIT;
+  if (request.action === "startTimer") {
 
-    timerInterval = setInterval(() => {
-      timePassed = timePassed += 1;
-      timeLeft = TIME_LIMIT - timePassed;
-
-      console.log(timeLeft);
-
-      if (timeLeft === 0) {
-        // onTimesUp();
+    let timerInterval = setInterval(() => {
+      if (JSON.parse(localStorage.getItem("timer")) === 0) {
         clearInterval(timerInterval);
+        localStorage.setItem("timer", JSON.stringify(TIME_LIMIT));
+      } else {
+        timePassed += 1;
+        timeLeft = TIME_LIMIT - timePassed;
+  
+        localStorage.setItem("timer", JSON.stringify(timeLeft));
       }
+      
     }, 1000);
-    
   }
+
+  if (request.action === "resetTime") {
+    localStorage.setItem("timer", JSON.stringify(0));
+  }
+
+  if (request.action === "askTime") {
+    sendResponse(JSON.parse(localStorage.getItem("timer")));
+  }
+
   // if (request.cmd === "START_TIMER") {
   //   timerTime = new Date(request.when);
   //   timerID = setTimeout(() => {
@@ -137,7 +143,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     request.action != "editSub" &&
     request.action != "sub" &&
     request.action != "deleteSub" &&
-    request.action != "timer"
+    request.action != "startTimer" &&
+    request.action != "askTime"
   ) {
     //adding a new object
     obj.item.push(request);
