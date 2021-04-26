@@ -7,10 +7,12 @@ function reset() {
   let obj = {
     item: [],
   };
-  // let timer;
-
   localStorage.setItem("iList", JSON.stringify(obj));
-  const TIME_LIMIT = 120;
+
+  let trackTimer = 0;
+  localStorage.setItem("trackTimer", JSON.stringify(trackTimer));
+
+  const TIME_LIMIT = 900;
   localStorage.setItem("timer", JSON.stringify(TIME_LIMIT));
 }
 
@@ -18,11 +20,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log(request);
 
   const obj = JSON.parse(localStorage.getItem("iList")); //getItem(the object name key)
-  const TIME_LIMIT = 120;
+  const TIME_LIMIT = 900;
   let timePassed = 0;
   let timeLeft = TIME_LIMIT;
 
   if (request.action === "startTimer") {
+    localStorage.setItem("trackTimer", JSON.stringify(1));
 
     let timerInterval = setInterval(() => {
       if (JSON.parse(localStorage.getItem("timer")) === 0) {
@@ -39,21 +42,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === "resetTime") {
+    localStorage.setItem("trackTimer", JSON.stringify(0));
     localStorage.setItem("timer", JSON.stringify(0));
   }
 
   if (request.action === "askTime") {
-    sendResponse(JSON.parse(localStorage.getItem("timer")));
+    sendResponse([JSON.parse(localStorage.getItem("timer")), JSON.parse(localStorage.getItem("trackTimer"))]);
   }
-
-  // if (request.cmd === "START_TIMER") {
-  //   timerTime = new Date(request.when);
-  //   timerID = setTimeout(() => {
-  //     // the time is app, alert the user.
-  //   }, timerTime.getTime() - Date.now());
-  // } else if (request.cmd === "GET_TIME") {
-  //   sendResponse({ time: timerTime });
-  // }
 
   if (request.action === "delete") {
     // now delete this message from the list
@@ -144,7 +139,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     request.action != "sub" &&
     request.action != "deleteSub" &&
     request.action != "startTimer" &&
-    request.action != "askTime"
+    request.action != "askTime" && 
+    request.action != "resetTime"
   ) {
     //adding a new object
     obj.item.push(request);

@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const FULL_DASH_ARRAY = 283;
-  const WARNING_THRESHOLD = 10;
-  const ALERT_THRESHOLD = 5;
+  const FULL_DASH_ARRAY = 900;
+  const WARNING_THRESHOLD = 300;
+  const ALERT_THRESHOLD = 60;
 
   const COLOR_CODES = {
     info: {
@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
     },
   };
 
-  const TIME_LIMIT = 120;
+  const TIME_LIMIT = 900;
   let timePassed = 0;
   let timeLeft = TIME_LIMIT;
   let timerInterval = null;
@@ -47,39 +47,44 @@ document.addEventListener("DOMContentLoaded", function () {
 </div>
 `;
 
-  function onTimesUp() {
-    clearInterval(timerInterval);
-  }
+  // function onTimesUp() {
+  //   clearInterval(timerInterval);
+  // }
 
-  timerInterval = setInterval(() => {
-   
-    chrome.runtime.sendMessage(
-      {
-        action: "askTime",
-      },
-      function (response) {
-        timeLeft = response;
+  var trackTimer = 0; //0 = off, 1 = on
 
-        // if(timeLeft != 0 && timeLeft != 120){
-        //   document.getElementById("playButton").style.display = "none";
-        //   document.getElementById("resetButton").style.display = "block";
-        // } else {
-        //   document.getElementById("playButton").style.display = "block";
-        //   document.getElementById("resetButton").style.display = "none";
-        // }
+    timerInterval = setInterval(() => {
+      chrome.runtime.sendMessage(
+        {
+          action: "askTime",
+        },
+        function (response) {
+          console.log(response);
 
-        document.getElementById("base-timer-label").innerHTML = formatTime(
-          timeLeft
-        );
-        setCircleDasharray();
-        setRemainingPathColor(timeLeft);
+          timeLeft = response[0];
+          trackTimer = response[1];
 
-        if (timeLeft === 0) {
-          onTimesUp();
+          if (trackTimer == 1) {
+            document.getElementById("playButton").style.display = "none";
+            document.getElementById("resetButton").style.display = "block";
+          } else if (trackTimer == 0) {
+            document.getElementById("playButton").style.display = "block";
+            document.getElementById("resetButton").style.display = "none";
+          }
+
+          document.getElementById("base-timer-label").innerHTML = formatTime(
+            timeLeft
+          );
+          setCircleDasharray();
+          setRemainingPathColor(timeLeft);
+
+          // if (timeLeft === 0) {
+          //   onTimesUp();
+          // }
         }
-      }
-    );
-  }, 1000);
+      );
+    }, 1000);
+  
 
   function formatTime(time) {
     const minutes = Math.floor(time / 60);
@@ -125,15 +130,6 @@ document.addEventListener("DOMContentLoaded", function () {
       .setAttribute("stroke-dasharray", circleDasharray);
   }
 
-  var trackTimer = 0; //0 = off, 1 = on
-  if (trackTimer == 1) {
-    document.getElementById("playButton").style.display = "none";
-    document.getElementById("resetButton").style.display = "block";
-  } else if (trackTimer == 0) {
-    document.getElementById("playButton").style.display = "block";
-    document.getElementById("resetButton").style.display = "none";
-  }
-
   document.getElementById("start").addEventListener("click", function (ev) {
     if (trackTimer == 0) {
       trackTimer = 1;
@@ -145,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
           action: "startTimer",
         },
         function (response) {
-          startTimer();
+          // startTimer();
         }
       );
     } else if (trackTimer == 1) {
