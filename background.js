@@ -30,6 +30,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     let timerInterval = setInterval(() => {
       if (JSON.parse(localStorage.getItem("timer")) === 0) {
         clearInterval(timerInterval);
+        localStorage.setItem("trackTimer", JSON.stringify(0));
         localStorage.setItem("timer", JSON.stringify(TIME_LIMIT));
       } else {
         timePassed += 1;
@@ -123,13 +124,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   }
 
-  // if (request.action === "timer") {
-  //   console.log(request.message);
-  //   localStorage.setItem("timer", request.message);
-
-  //   //send time back?
-  // }
-
   if (
     request.action != "getData" &&
     request.action != "delete" &&
@@ -147,7 +141,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     localStorage.setItem("iList", JSON.stringify(obj));
   }
 
-  // console.log(localStorage.getItem("timer"));
 
   //sending response back
   sendResponse(obj);

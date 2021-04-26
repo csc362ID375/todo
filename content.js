@@ -47,10 +47,6 @@ document.addEventListener("DOMContentLoaded", function () {
 </div>
 `;
 
-  // function onTimesUp() {
-  //   clearInterval(timerInterval);
-  // }
-
   var trackTimer = 0; //0 = off, 1 = on
 
     timerInterval = setInterval(() => {
@@ -77,10 +73,6 @@ document.addEventListener("DOMContentLoaded", function () {
           );
           setCircleDasharray();
           setRemainingPathColor(timeLeft);
-
-          // if (timeLeft === 0) {
-          //   onTimesUp();
-          // }
         }
       );
     }, 1000);
