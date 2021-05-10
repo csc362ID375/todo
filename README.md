@@ -7,9 +7,9 @@ Upon opening the extension, the user has two main features at their disposal.
 1. A To Do List: 
     To add a new task, the user can simply type it into the main input box with the waiting prompt "New Task..." and click the attached "Add" button. 
 
-    To edit an already added task, the user can click on the writing they wish to edit directly. This will make the text editable. Typing in these boxes autosaves changes, which the user will be altered of at the top of the popup. 
+    To edit an already added task, the user can click on the writing they wish to edit directly. This will make the text editable. Typing in these boxes autosaves changes, which the user will be alerted of at the top of the popup. 
 
-    To cross off a task, the user can check the check button. Clicking this button again will uncross off the task.
+    To cross off a task, the user can click the check button. Clicking this button again will uncross off the task.
 
     To add a subtask to a main task, the plus button can be clicked. A subtask will appear with the prompt "Edit Me". Subtasks can be edited the same as main tasks. 
 
