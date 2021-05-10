@@ -1,28 +1,31 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const FULL_DASH_ARRAY = 900;
-  const WARNING_THRESHOLD = 300;
-  const ALERT_THRESHOLD = 60;
+  //setting up timer
+  const FULL_DASH_ARRAY = 283; //1500
+  const WARNING_THRESHOLD = 750;
+  const ALERT_THRESHOLD = 375;
 
   const COLOR_CODES = {
     info: {
-      color: "green",
+      color: "green"
     },
     warning: {
       color: "orange",
-      threshold: WARNING_THRESHOLD,
+      threshold: WARNING_THRESHOLD
     },
     alert: {
       color: "red",
-      threshold: ALERT_THRESHOLD,
+      threshold: ALERT_THRESHOLD
+
     },
   };
 
-  const TIME_LIMIT = 900;
+  const TIME_LIMIT = 1500;
   let timePassed = 0;
   let timeLeft = TIME_LIMIT;
   let timerInterval = null;
   let remainingPathColor = COLOR_CODES.info.color;
 
+  //timer to HTML
   document.getElementById("timer").innerHTML = `
 <div class="base-timer">
   <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -49,35 +52,34 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var trackTimer = 0; //0 = off, 1 = on
 
-    timerInterval = setInterval(() => {
-      chrome.runtime.sendMessage(
-        {
-          action: "askTime",
-        },
-        function (response) {
-          console.log(response);
+  //timer for the page
+  timerInterval = setInterval(() => {
+    chrome.runtime.sendMessage(
+      {
+        action: "askTime",
+      },
+      function (response) {
+        timeLeft = response[0];
+        trackTimer = response[1];
 
-          timeLeft = response[0];
-          trackTimer = response[1];
-
-          if (trackTimer == 1) {
-            document.getElementById("playButton").style.display = "none";
-            document.getElementById("resetButton").style.display = "block";
-          } else if (trackTimer == 0) {
-            document.getElementById("playButton").style.display = "block";
-            document.getElementById("resetButton").style.display = "none";
-          }
-
-          document.getElementById("base-timer-label").innerHTML = formatTime(
-            timeLeft
-          );
-          setCircleDasharray();
-          setRemainingPathColor(timeLeft);
+        if (trackTimer == 1) {
+          document.getElementById("playButton").style.display = "none";
+          document.getElementById("resetButton").style.display = "block";
+        } else if (trackTimer == 0) {
+          document.getElementById("playButton").style.display = "block";
+          document.getElementById("resetButton").style.display = "none";
         }
-      );
-    }, 1000);
-  
 
+        document.getElementById("base-timer-label").innerHTML = formatTime(
+          timeLeft
+        );
+        setCircleDasharray();
+        setRemainingPathColor(timeLeft);
+      }
+    );
+  }, 1000);
+
+  //formats the timer
   function formatTime(time) {
     const minutes = Math.floor(time / 60);
     let seconds = time % 60;
@@ -89,6 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return `${minutes}:${seconds}`;
   }
 
+  //formats the path around the timer
   function setRemainingPathColor(timeLeft) {
     const { alert, warning, info } = COLOR_CODES;
     if (timeLeft <= alert.threshold) {
@@ -122,6 +125,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .setAttribute("stroke-dasharray", circleDasharray);
   }
 
+  //start and stop button
   document.getElementById("start").addEventListener("click", function (ev) {
     if (trackTimer == 0) {
       trackTimer = 1;
@@ -133,7 +137,6 @@ document.addEventListener("DOMContentLoaded", function () {
           action: "startTimer",
         },
         function (response) {
-          // startTimer();
         }
       );
     } else if (trackTimer == 1) {
@@ -152,18 +155,17 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       );
     }
-    // startTimer();
   });
 
-  // get data on load --> is this only when its reset?
+  // get list data on load 
   chrome.runtime.sendMessage(
     {
       action: "getData",
     },
     function (response) {
-      console.log(response);
       document.getElementById("myUL").innerHTML = "";
       // invoke callback with response
+      //makes list on screen
       for (i = 0; i < response["item"].length; i++) {
         var li = document.createElement("li");
         var nextItem = response["item"][i]["message"];
@@ -189,8 +191,11 @@ document.addEventListener("DOMContentLoaded", function () {
           span.appendChild(txt);
           li.appendChild(span);
 
-          var t = document.createTextNode(nextItem);
-          li.appendChild(t);
+          var span = document.createElement("P");
+          var txt = document.createTextNode(nextItem);
+          span.className = "lTxt";
+          span.appendChild(txt);
+          li.appendChild(span);
 
           if (nextStatus == "checked") {
             li.classList.toggle("checked");
@@ -198,6 +203,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
           document.getElementById("myUL").appendChild(li);
 
+          //subtasks
           if (nextSubs != undefined) {
             for (var j = 0; j < nextSubs.length; j++) {
               var li = document.createElement("li");
@@ -208,8 +214,11 @@ document.addEventListener("DOMContentLoaded", function () {
               span.appendChild(txt);
               li.appendChild(span);
 
-              var t = document.createTextNode(nextSubs[j]);
-              li.appendChild(t);
+              var span = document.createElement("P");
+              var txt = document.createTextNode(nextSubs[j]);
+              span.className = "sub";
+              span.appendChild(txt);
+              li.appendChild(span);
 
               li.classList = "sub";
 
@@ -221,6 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   );
 
+  //add button
   var btn = document.getElementById("addButton");
 
   //Adding to the list
@@ -256,8 +266,11 @@ document.addEventListener("DOMContentLoaded", function () {
             span.appendChild(txt);
             li.appendChild(span);
 
-            var t = document.createTextNode(nextItem);
-            li.appendChild(t);
+            var span = document.createElement("P");
+            var txt = document.createTextNode(nextItem);
+            span.className = "lTxt";
+            span.appendChild(txt);
+            li.appendChild(span);
 
             document.getElementById("myUL").appendChild(li);
           }
@@ -272,18 +285,17 @@ document.addEventListener("DOMContentLoaded", function () {
   list.addEventListener(
     "click",
     function (ev) {
-      // var close = document.getElementsByClassName("close");
 
       if (ev.target.className === "close") {
         //get rid of this element
         if (ev.target.parentElement.className == "sub") {
           var elDelete = ev.target.parentElement.innerText;
-          var textelDelete = elDelete.slice(2, elDelete.length);
+          var textelDelete = elDelete.slice(3, elDelete.length);
 
           var action = "deleteSub";
         } else {
           var elDelete = ev.target.parentElement.innerText;
-          var textelDelete = elDelete.slice(6, elDelete.length);
+          var textelDelete = elDelete.slice(7, elDelete.length);
           var action = "delete";
         }
 
@@ -321,8 +333,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 span.appendChild(txt);
                 li.appendChild(span);
 
-                var t = document.createTextNode(nextItem);
-                li.appendChild(t);
+                var span = document.createElement("P");
+                var txt = document.createTextNode(nextItem);
+                span.className = "lTxt";
+                span.appendChild(txt);
+                li.appendChild(span);
+
+                if (nextStatus == "checked") {
+                  li.classList.toggle("checked");
+                }
 
                 document.getElementById("myUL").appendChild(li);
 
@@ -336,8 +355,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     span.appendChild(txt);
                     li.appendChild(span);
 
-                    var t = document.createTextNode(nextSubs[j]);
-                    li.appendChild(t);
+                    var span = document.createElement("P");
+                    var txt = document.createTextNode(nextSubs[j]);
+                    span.className = "sub";
+                    span.appendChild(txt);
+                    li.appendChild(span);
 
                     li.classList = "sub";
 
@@ -351,7 +373,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (ev.target.className === "open") {
         //check this element
         var elCheck = ev.target.parentElement.innerText;
-        var textelCheck = elCheck.slice(6, elCheck.length);
+        var textelCheck = elCheck.slice(7, elCheck.length);
 
         //add subcategory
         chrome.runtime.sendMessage(
@@ -390,8 +412,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 span.appendChild(txt);
                 li.appendChild(span);
 
-                var t = document.createTextNode(nextItem);
-                li.appendChild(t);
+                var span = document.createElement("P");
+                var txt = document.createTextNode(nextItem);
+                span.className = "lTxt";
+                span.appendChild(txt);
+                li.appendChild(span);
 
                 if (nextStatus == "checked") {
                   li.classList.toggle("checked");
@@ -409,8 +434,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     span.appendChild(txt);
                     li.appendChild(span);
 
-                    var t = document.createTextNode(nextSubs[j]);
-                    li.appendChild(t);
+                    var span = document.createElement("P");
+                    var txt = document.createTextNode(nextSubs[j]);
+                    span.className = "sub";
+                    span.appendChild(txt);
+                    li.appendChild(span);
 
                     li.classList = "sub";
 
@@ -424,7 +452,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (ev.target.className === "cross") {
         //check this element
         var elCheck = ev.target.parentElement.innerText;
-        var textelCheck = elCheck.slice(6, elCheck.length);
+        var textelCheck = elCheck.slice(7, elCheck.length);
 
         //mark as checked off
         chrome.runtime.sendMessage(
@@ -434,55 +462,53 @@ document.addEventListener("DOMContentLoaded", function () {
           },
           function (response) {
             // invoke callback with response
-            // rewrite the screen
+            // change css for this element on the screen
             ev.target.parentElement.classList.toggle("checked");
           }
         );
-      } else if (ev.target.tagName === "LI") {
+      } else {
         //edit subtasks
-        if (ev.target.className == "sub") {
-          var elEdit = ev.target.innerText;
-          var oldText = elEdit.slice(2, elEdit.length);
+        var oldText = ev.target.innerText;
 
+        if (ev.target.className == "sub") {
           var action = "editSub";
         } else {
-          var elEdit = ev.target.innerText;
-          var oldText = elEdit.slice(6, elEdit.length);
-
           var action = "edit";
         }
 
-        ev.target.contentEditable = true;
+        if (
+          ev.target.tagName === "P" &&
+          ev.target.className != "open" &&
+          ev.target.className != "close" &&
+          ev.target.className != "cross"
+        ) {
+          //makes the task editable and focuses on it to type easily
+          ev.target.contentEditable = true;
+          ev.target.focus();
 
-        //on click event listener for whole page
-        var ignoreClickOnMeElement = ev.target;
+          ev.target.addEventListener("input", function () {
+            document.getElementById("saving").innerHTML = "Autosaving...";
+            setTimeout(function(){
+              document.getElementById("saving").innerHTML = " ";
+            }, 1500)
 
-        window.addEventListener("click", function (event) {
-          var isClickInsideElement = ignoreClickOnMeElement.contains(
-            event.target
-          );
-          if (!isClickInsideElement) {
-            //Do something click is outside specified element
-            //edit subtasks
-            if (action == "editSub") {
-              var elEdit = ev.target.innerText;
-              var textelCheck = elEdit.slice(2, elEdit.length);
-            } else {
-              var elEdit = ev.target.innerText;
-              var textelCheck = elEdit.slice(6, elEdit.length);
-            }
+            var elEdit = ev.target.innerText;
+
+            console.log(oldText + " " + elEdit);
 
             chrome.runtime.sendMessage(
               {
                 action: action,
                 fix: oldText,
-                message: textelCheck,
+                message: elEdit,
                 status: "unchecked",
               },
-              function (response) {}
+              function (response) {
+                oldText = response;
+              }
             );
-          }
-        });
+          });
+        }
       }
     },
     false

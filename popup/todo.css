@@ -7,6 +7,13 @@ body {
   width: 300px;
 }
 
+.lTxt {
+  max-width: 125px;
+  min-width: 100px;
+  margin: 0px;
+  min-height: 22px;
+}
+
 /* Remove margins and padding from the list */
 ul {
   margin: 0;
@@ -86,8 +93,12 @@ ul li.checked {
 }
 
 /*sub class */
-.sub {
-  text-indent: 50px;
+.sub p {
+  max-width: 125px;
+  min-width: 100px;
+  min-height: 22px;
+  margin: 0px;
+  margin-left: 50px;
 }
 
 /* Style the header */
@@ -197,6 +208,8 @@ input {
   font-size: 10px;
 }
 
+/* Buttons */
+
 #start {
   font-size: 8px;
   width: 45px;
@@ -204,7 +217,7 @@ input {
   padding: 0px;
   margin-right: 10px;
   margin-right: 10px;
-  transform: scale(.75);
+  transform: scale(0.75);
 
   float: right;
 
@@ -222,7 +235,13 @@ input {
 
 #resetButton {
   display: none;
-  opacity: .5;
+  opacity: 0.5;
   background-color: red;
   border-radius: 50px;
+}
+
+/* Auto save note */
+#saving{
+  margin-top: 60px;
+  margin-bottom: -55px;
 }

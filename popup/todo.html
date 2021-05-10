@@ -1,21 +1,28 @@
 <html>
-
+<!-- Author: Mimi Ughetta
+To Do List Extension -->
 <head>
+    <!-- Other Files -->
+    <title>To Do</title>
     <link rel="stylesheet" href="todo.css" />
     <script src="/content.js"></script>
     <script src="/background.js"></script>
-
 </head>
 
 <body>
+    <!-- Header -->
     <div id="myDIV" class="header">
         <h2>To Do</h2>
+        <!-- Adding New Tasks -->
         <input type="text" id="myInput" placeholder="New Task...">
         <span id="addButton" class="addBtn">Add</span>
+        <p id = "saving"></p>
     </div>
 
+    <!-- list -->
     <ul id="myUL">
     </ul>
+    <!-- timer -->
     <span id = "timer"></span> 
     <button id = "start" class="addBtn" style = "margin-bottom: 10px;">
         <img id="playButton" src="https://res.cloudinary.com/https-tinloof-com/image/upload/v1593360448/blog/time-in-js/play-button_opkxmt.svg" />

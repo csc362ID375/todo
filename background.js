@@ -3,6 +3,7 @@ chrome.runtime.onInstalled.addListener((details) => {
   reset();
 });
 
+//reset when extension loaded to chrome
 function reset() {
   let obj = {
     item: [],
@@ -12,18 +13,20 @@ function reset() {
   let trackTimer = 0;
   localStorage.setItem("trackTimer", JSON.stringify(trackTimer));
 
-  const TIME_LIMIT = 900;
+  const TIME_LIMIT = 1500;
   localStorage.setItem("timer", JSON.stringify(TIME_LIMIT));
 }
 
+//all messages from context
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log(request);
 
+  //variables
   const obj = JSON.parse(localStorage.getItem("iList")); //getItem(the object name key)
-  const TIME_LIMIT = 900;
+  const TIME_LIMIT = 1500;
   let timePassed = 0;
   let timeLeft = TIME_LIMIT;
 
+  //starting the timer
   if (request.action === "startTimer") {
     localStorage.setItem("trackTimer", JSON.stringify(1));
 
@@ -32,6 +35,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         clearInterval(timerInterval);
         localStorage.setItem("trackTimer", JSON.stringify(0));
         localStorage.setItem("timer", JSON.stringify(TIME_LIMIT));
+
+        chrome.browserAction.setIcon({ path: "icons/todoRed.png" });
       } else {
         timePassed += 1;
         timeLeft = TIME_LIMIT - timePassed;
@@ -42,15 +47,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }, 1000);
   }
 
+  //reset time
   if (request.action === "resetTime") {
     localStorage.setItem("trackTimer", JSON.stringify(0));
     localStorage.setItem("timer", JSON.stringify(0));
   }
 
+  //asking time when pop up is open
   if (request.action === "askTime") {
+    chrome.browserAction.setIcon({ path: "icons/todo.png" });
     sendResponse([JSON.parse(localStorage.getItem("timer")), JSON.parse(localStorage.getItem("trackTimer"))]);
   }
 
+  //deleting task
   if (request.action === "delete") {
     // now delete this message from the list
     for (var i = 0; i < obj.item.length; i++) {
@@ -61,6 +70,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   }
 
+  //deleting subtask
   if (request.action === "deleteSub") {
     // now delete this message from the list
     for (var i = 0; i < obj.item.length; i++) {
@@ -75,6 +85,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   }
 
+  //creating subtask
   if (request.action === "sub") {
     for (var i = 0; i < obj.item.length; i++) {
       if (request.message == obj.item[i].message) {
@@ -88,6 +99,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   }
 
+  //giving a task or subtask a check attribute
   if (request.action === "check") {
     for (var i = 0; i < obj.item.length; i++) {
       if (request.message == obj.item[i].message) {
@@ -101,6 +113,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   }
 
+  //editing a task 
   if (request.action === "edit") {
     for (var i = 0; i < obj.item.length; i++) {
       if (request.fix == obj.item[i].message) {
@@ -108,8 +121,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         localStorage.setItem("iList", JSON.stringify(obj));
       }
     }
+    //sends back what was just saved so that autosave can happen while typing
+    sendResponse(request.message);
   }
 
+  //editing a sub task
   if (request.action === "editSub") {
     // now edit this message from the sub list
     for (var i = 0; i < obj.item.length; i++) {
@@ -122,6 +138,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
       }
     }
+    //sends back what was just saved so that autosave can happen while typing
+    sendResponse(request.message);
   }
 
   if (
@@ -141,16 +159,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     localStorage.setItem("iList", JSON.stringify(obj));
   }
 
-
   //sending response back
   sendResponse(obj);
-});
-
-// background.js
-chrome.runtime.onConnectExternal.addListener(function (port) {
-  if (port.name === "popup") {
-    port.onDisconnect.addListener(function () {
-      console.log("pop up closed");
-    });
-  }
 });
