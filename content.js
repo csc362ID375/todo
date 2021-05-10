@@ -65,16 +65,21 @@ document.addEventListener("DOMContentLoaded", function () {
         if (trackTimer == 1) {
           document.getElementById("playButton").style.display = "none";
           document.getElementById("resetButton").style.display = "block";
+
+          document.getElementById("base-timer-label").innerHTML = formatTime(
+            timeLeft
+          );
+          setCircleDasharray();
+          setRemainingPathColor(timeLeft);
         } else if (trackTimer == 0) {
           document.getElementById("playButton").style.display = "block";
           document.getElementById("resetButton").style.display = "none";
+          document.getElementById("base-timer-label").innerHTML = formatTime(
+            1500
+          );
+          setCircleDasharray();
+          setRemainingPathColor(1500);
         }
-
-        document.getElementById("base-timer-label").innerHTML = formatTime(
-          timeLeft
-        );
-        setCircleDasharray();
-        setRemainingPathColor(timeLeft);
       }
     );
   }, 1000);
