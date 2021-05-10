@@ -1,6 +1,6 @@
 # todo
 
-While digital technology is an extremely useful tool, the time in which we must spend staring at our screens during this pandemic can be concerning. From zoom classes, to calling friends, to even ordering food, I have to use the internet. Knowing that I wouldn’t be able to simply make a substitute for our screen in this class, I wanted to instead build an application that improves productivity for anyone on the internet, hopefully allowing us more manageable time on our devices. Overall, this extension utilizes data inputted by the user to help organize their life a little bit better.
+While digital technology is an extremely useful tool, the time in which we must spend staring at our screens during this pandemic can be concerning. From zoom classes, to calling friends, to even ordering food, we have to use the internet. Knowing that I wouldn’t be able to simply make a substitute for our screen in this class, I wanted to instead build an application that improves productivity for anyone on the internet, hopefully allowing us more manageable time on our devices. Overall, this extension utilizes data inputted by the user to help organize their life a little bit better.
 
 Upon opening the extension, the user has two main features at their disposal. 
 
